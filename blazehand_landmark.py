@@ -87,6 +87,11 @@ class BlazeHandLandmark(BlazeLandmark):
 
 
     def forward(self, x):
+        #########################################
+        x = x[:,:,:,[2, 1, 0]] # BRG to RGB
+        x = x.permute(0,3,1,2).float() / 255.
+        #########################################
+
         if x.shape[0] == 0:
             return torch.zeros((0,)), torch.zeros((0,)), torch.zeros((0, 21, 3))
 
@@ -108,8 +113,14 @@ class BlazeHandLandmark(BlazeLandmark):
 
         x = self.backbone8(x)
 
+        #########################################
         hand_flag = self.hand_flag(x).view(-1).sigmoid()
-        handed = self.handed(x).view(-1).sigmoid()
-        landmarks = self.landmarks(x).view(-1, 21, 3) / 256
+        landmarks = self.landmarks(x).view(-1, 21, 3)
+        return landmarks, hand_flag
+        #########################################
 
-        return hand_flag, handed, landmarks
+        #hand_flag = self.hand_flag(x).view(-1).sigmoid()
+        #handed = self.handed(x).view(-1).sigmoid()
+        #landmarks = self.landmarks(x).view(-1, 21, 3) / 256
+
+        #return hand_flag, handed, landmarks

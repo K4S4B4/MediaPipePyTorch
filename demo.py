@@ -57,7 +57,7 @@ while hasFrame:
     if mirror_img:
         frame = np.ascontiguousarray(frame[:,::-1,::-1])
     else:
-        frame = np.ascontiguousarray(frame[:,:,::-1])
+        frame = np.ascontiguousarray(frame[:,:,::-1]) # BRG to RGB
 
     img1, img2, scale, pad = resize_pad(frame)
 
@@ -79,6 +79,10 @@ while hasFrame:
 
     xc, yc, scale, theta = palm_detector.detection2roi(palm_detections.cpu())
     img, affine2, box2 = hand_regressor.extract_roi(frame, xc, yc, theta, scale)
+    #if img.shape[0]>0:
+    #    debugImg = img[0].clone().permute(1,2,0).to('cpu').detach().numpy().copy()
+    #    cv2.imshow('input', debugImg)
+    #    cv2.waitKey(1)
     flags2, handed2, normalized_landmarks2 = hand_regressor(img.to(gpu))
     landmarks2 = hand_regressor.denormalize_landmarks(normalized_landmarks2.cpu(), affine2)
     
