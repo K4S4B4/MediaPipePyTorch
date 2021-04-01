@@ -108,6 +108,11 @@ class BlazePalm(BlazeDetector):
         self.regressor_8 = nn.Conv2d(256, 108, 1, bias=True)
         
     def forward(self, x):
+        ##############################################
+        x = x[:,:,:,[2, 1, 0]] # BRG to RGB
+        x = x.permute(0,3,1,2).float() / 255.
+        ##############################################
+
         b = x.shape[0]      # batch size, needed for reshaping later
 
         x = F.pad(x, (0, 1, 0, 1), "constant", 0)
@@ -154,4 +159,45 @@ class BlazePalm(BlazeDetector):
 
         r = torch.cat((r3, r2, r1), dim=1)  # (b, 896, 16)
 
-        return [r, c]
+        #return [r, c]
+
+        ##############################################
+
+        # 3. Postprocess the raw predictions:
+        detections = self._tensors_to_detections(r, c, self.anchors)
+        #detections = self._tensors_to_detections(out[0], out[1], self.anchors)
+
+        # 4. Non-maximum suppression to remove overlapping detections:
+        filtered_detections = []
+        for i in range(len(detections)):
+            faces = self._weighted_non_max_suppression(detections[i])
+            faces = torch.stack(faces) if len(faces) > 0 else torch.zeros((0, self.num_coords+1))
+            filtered_detections.append(faces)
+
+        # denormalize
+        detections = filtered_detections[0]
+
+        detections[:, 0] = detections[:, 0] * 256
+        detections[:, 1] = detections[:, 1] * 256
+        detections[:, 2] = detections[:, 2] * 256
+        detections[:, 3] = detections[:, 3] * 256
+
+        detections[:, 4::2] = detections[:, 4::2] * 256
+        detections[:, 5::2] = detections[:, 5::2] * 256
+
+        # calc xc, yc, scale, theta
+        xc, yc, scale, theta = self.detection2roi(detections)
+
+        # find rotated bbox of the hand
+        points = torch.tensor([[-1, -1, 1, 1],
+                               [-1, 1, -1, 1]], device=scale.device).view(1,2,4)
+        points = points * scale.view(-1,1,1)/2
+        theta = theta.view(-1, 1, 1)
+        R = torch.cat((
+            torch.cat((torch.cos(theta), -torch.sin(theta)), 2),
+            torch.cat((torch.sin(theta), torch.cos(theta)), 2),
+            ), 1)
+        center = torch.cat((xc.view(-1,1,1), yc.view(-1,1,1)), 1)
+        points = R @ points + center
+
+        return points

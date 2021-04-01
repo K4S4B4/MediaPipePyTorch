@@ -21,7 +21,7 @@ if capture.isOpened():
 else:
     hasFrame = False
 
-onnx_file_name = 'resource/MediaPipe/BlazeHand_b_256_256_BGRxByte.onnx'
+onnx_file_name = 'resource/MediaPipe/BlazeHand_1_256_256_BGRxByte.onnx'
 sess_options = onnxruntime.SessionOptions()
 sess_options.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
 sess_options.enable_profiling = True
@@ -38,12 +38,13 @@ while hasFrame:
     ort_outs = ort_session.run(None, ort_inputs)
 
     for i in range(len(ort_outs[0])):
-        landmark, flag = ort_outs[0][i], ort_outs[1][i]
+        landmark, flag, hanndedness = ort_outs[0][i], ort_outs[1][i], ort_outs[2][i]
         if flag > 0.2:
-            draw_landmarks(frame, landmark[:,:2], HAND_CONNECTIONS, size=2)
-            print(flag)
+            if hanndedness > 0.9 or hanndedness < 0.1:
+                draw_landmarks(img1, landmark[:,:2], HAND_CONNECTIONS, size=2)
+                print(hanndedness)
 
-    cv2.imshow(WINDOW, frame)
+    cv2.imshow(WINDOW, img1)
 
     hasFrame, frame = capture.read()
     key = cv2.waitKey(1)

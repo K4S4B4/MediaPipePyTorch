@@ -24,13 +24,13 @@ back_detector = True
 #    face_detector.load_weights("blazeface.pth")
 #    face_detector.load_anchors("anchors_face.npy")
 
-#palm_detector = BlazePalm().to(gpu)
-#palm_detector.load_weights("blazepalm.pth")
-#palm_detector.load_anchors("anchors_palm.npy")
-#palm_detector.min_score_thresh = .75
+palm_detector = BlazePalm().to(gpu)
+palm_detector.load_weights("blazepalm.pth")
+palm_detector.load_anchors("anchors_palm.npy")
+palm_detector.min_score_thresh = .75
 
-hand_regressor = BlazeHandLandmark().to(gpu)
-hand_regressor.load_weights("blazehand_landmark.pth")
+#hand_regressor = BlazeHandLandmark().to(gpu)
+#hand_regressor.load_weights("blazehand_landmark.pth")
 
 #face_regressor = BlazeFaceLandmark().to(gpu)
 #face_regressor.load_weights("blazeface_landmark.pth")
@@ -58,7 +58,7 @@ hand_regressor.load_weights("blazehand_landmark.pth")
 #normalized_landmarks2, flags2 = hand_regressor(img1)
 
 ##############################################################################
-batch_size = 1
+batch_size = 3
 height = 256
 width = 256
 ##############################################################################
@@ -69,18 +69,15 @@ x = torch.randn((batch_size, height, width, 3), requires_grad=True).byte().to(gp
 
 #onnx_file_name = "BlazeHand_{}x{}x{}xBGRxByte_pose2dWithConf.onnx".format(batch_size, height, width)
 input_names = ["input"] #[B,256,256,3],
-output_names = ['joint3d', 'confidence', 'handedness'] #[B,21,3], [B]
+output_names = ['points'] #[B,21,3], [B]
 
-onnx_file_name = "BlazeHand_1_{}_{}_BGRxByte.onnx".format(height, width)
-#dynamic_axes = {
-#    "input": {0: "batch_size"}, 
-#    "joint3d": {0: "batch_size"}, 
-#    "confidence": {0: "batch_size"},
-#    "handedness": {0: "batch_size"}
-    
-#    }
+onnx_file_name = "BlazePalm_{}_{}_{}_BGRxByte.onnx".format(batch_size, height, width)
+dynamic_axes = {
+    "input": {0: "batch_size"}, 
+    "points": {0: "batch_size"}, 
+    }
 
-torch.onnx.export(hand_regressor,
+torch.onnx.export(palm_detector,
                 x,
                 onnx_file_name,
                 export_params=True,
@@ -88,6 +85,6 @@ torch.onnx.export(hand_regressor,
                 do_constant_folding=True,
                 input_names=input_names, 
                 output_names=output_names
-                #,dynamic_axes=dynamic_axes
+                ,dynamic_axes=dynamic_axes
                 )
 print('Onnx model exporting done')
