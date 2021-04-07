@@ -43,8 +43,8 @@ while hasFrame:
 
     x = ort_outs[0][0][0][0][0]
     y = ort_outs[0][0][1][0][0]
-    w = ort_outs[0][0][2][0][0] * 0.6
-    t = ort_outs[0][0][3][0][0]
+    t = ort_outs[0][0][2][0][0]
+    w = ort_outs[0][0][3][0][0]
 
     #y = (ort_outs[0][0][1][0][0] + ort_outs[0][0][3][0][0]) / 2
     #x = (ort_outs[0][0][0][0][0] + ort_outs[0][0][2][0][0]) / 2
@@ -56,6 +56,7 @@ while hasFrame:
 
     cv2.rectangle(img1, (int(x - w), int(y - w)), (int(x + w), int(y + w)), (255,0,0))
     cv2.circle(img1, (int(x), int(y)), 10, (0,255,0))
+    cv2.circle(img1, (int(w), int(t)), 10, (0,255,255))
     #cv2.circle(img1, (int(x + w * np.cos(t / 180 * np.pi)), int(y + w * np.sin(t/ 180 * np.pi))), 10, (0,255,0))
 
     #palm_detections = denormalize_detections(normalized_palm_detections, scale, pad)
