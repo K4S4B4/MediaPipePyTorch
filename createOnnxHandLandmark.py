@@ -58,7 +58,7 @@ hand_regressor.load_weights("blazehand_landmark.pth")
 #normalized_landmarks2, flags2 = hand_regressor(img1)
 
 ##############################################################################
-batch_size = 4
+batch_size = 3
 height = 256
 width = 256
 ##############################################################################
@@ -72,13 +72,13 @@ input_names = ["input"] #[B,256,256,3],
 output_names = ['joint3d', 'confidence', 'handedness'] #[B,21,3], [B]
 
 onnx_file_name = "BlazeHand_{}_{}_{}_BGRxByte.onnx".format(batch_size, height, width)
-#dynamic_axes = {
-#    "input": {0: "batch_size"}, 
-#    "joint3d": {0: "batch_size"}, 
-#    "confidence": {0: "batch_size"},
-#    "handedness": {0: "batch_size"}
+dynamic_axes = {
+    "input": {0: "batch_size"}, 
+    "joint3d": {0: "batch_size"}, 
+    "confidence": {0: "batch_size"},
+    "handedness": {0: "batch_size"}
     
-#    }
+    }
 
 torch.onnx.export(hand_regressor,
                 x,
@@ -88,6 +88,6 @@ torch.onnx.export(hand_regressor,
                 do_constant_folding=True,
                 input_names=input_names, 
                 output_names=output_names
-                #,dynamic_axes=dynamic_axes
+                ,dynamic_axes=dynamic_axes
                 )
 print('Onnx model exporting done')

@@ -117,9 +117,9 @@ class BlazeHandLandmark(BlazeLandmark):
 
         hand_flag = self.hand_flag(x).view(-1).sigmoid()
         handed = self.handed(x).view(-1).sigmoid()
-        landmarks = self.landmarks(x).view(-1, 21, 3) / 256
-        #landmarks = self.landmarks(x).view(-1, 21, 3)
+        #landmarks = self.landmarks(x).view(-1, 21, 3) / 256
+        landmarks = self.landmarks(x).view(-1, 21, 3)
 
-        return hand_flag, handed, landmarks
-        #return landmarks, hand_flag, handed
+        #return hand_flag, handed, landmarks
+        return landmarks, hand_flag, handed
 
