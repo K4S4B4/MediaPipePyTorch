@@ -71,6 +71,8 @@ while hasFrame:
     flags, normalized_landmarks = face_regressor(img.to(gpu))
     landmarks = face_regressor.denormalize_landmarks(normalized_landmarks.cpu(), affine)
 
+    frame = cv2.rectangle(frame, (0,0), (400,400), (120, 120, 120), 400)
+
     for i in range(len(flags)):
         landmark, flag = landmarks[i], flags[i]
         if flag>.5:
@@ -79,7 +81,7 @@ while hasFrame:
     draw_roi(frame, box)
     draw_detections(frame, face_detections)
 
-    cv2.imshow(WINDOW, frame[:,:,::-1])
+    cv2.imshow(WINDOW, frame[:,:,:])
     # cv2.imwrite('sample/%04d.jpg'%frame_ct, frame[:,:,::-1])
 
     hasFrame, frame = capture.read()

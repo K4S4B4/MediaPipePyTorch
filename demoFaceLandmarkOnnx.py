@@ -28,7 +28,8 @@ if capture.isOpened():
 else:
     hasFrame = False
 
-onnx_file_name = 'resource/MediaPipe/BlazeFace_B_192_192_BGRxByte.onnx'
+onnx_file_name = 'BlazeFace_1_192_192_BGRxByte.onnx'
+#onnx_file_name = 'resource/MediaPipe/BlazeFace_B_192_192_BGRxByte.onnx'
 sess_options = onnxruntime.SessionOptions()
 sess_options.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
 sess_options.enable_profiling = True
@@ -47,10 +48,13 @@ while hasFrame:
 
     ort_outs = ort_session.run(None, ort_inputs)
 
+    frame = cv2.rectangle(img3, (30,30), (162,162), (255, 255, 255), -1)
+    img3 = cv2.resize(img3, (960,960))
+
     for i in range(len(ort_outs[0])):
         landmark, flag = ort_outs[0][i], ort_outs[1][i]
         if flag>.5:
-            draw_landmarks(img3, landmark[:,:2], FACE_CONNECTIONS, size=1)
+            draw_landmarks(img3, landmark[:,:2] * 5, FACE_CONNECTIONS, size=1)
 
     cv2.imshow(WINDOW, img3)
 
