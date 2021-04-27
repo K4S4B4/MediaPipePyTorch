@@ -4,6 +4,7 @@ import sys
 from blazebase import resize_pad, denormalize_detections
 from visualization import draw_detections, draw_landmarks, draw_roi, HAND_CONNECTIONS, FACE_CONNECTIONS
 import onnxruntime
+import math
 
 
 WINDOW='test'
@@ -23,8 +24,8 @@ else:
 
 onnx_file_name = 'resource/MediaPipe/hand_recrop.onnx'
 sess_options = onnxruntime.SessionOptions()
-sess_options.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
-sess_options.enable_profiling = True
+#sess_options.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
+#sess_options.enable_profiling = True
 ort_session = onnxruntime.InferenceSession(onnx_file_name, sess_options)
 
 input_name = ort_session.get_inputs()[0].name
@@ -43,8 +44,8 @@ while hasFrame:
 
     x = ort_outs[0][0][0][0][0]
     y = ort_outs[0][0][1][0][0]
-    t = ort_outs[0][0][2][0][0]
-    w = ort_outs[0][0][3][0][0]
+    u = ort_outs[0][0][2][0][0]
+    v = ort_outs[0][0][3][0][0]
 
     #y = (ort_outs[0][0][1][0][0] + ort_outs[0][0][3][0][0]) / 2
     #x = (ort_outs[0][0][0][0][0] + ort_outs[0][0][2][0][0]) / 2
@@ -54,9 +55,11 @@ while hasFrame:
     ##scale *= 2.6
     #w = scale
 
-    cv2.rectangle(img1, (int(x - w), int(y - w)), (int(x + w), int(y + w)), (255,0,0))
+    width = math.sqrt( (x-u)*(x-u) + (y-v)*(y-v) )
+
+    cv2.circle(img1, (int(x), int(y)), int(width), (255,0,0))
     cv2.circle(img1, (int(x), int(y)), 10, (0,255,0))
-    cv2.circle(img1, (int(w), int(t)), 10, (0,255,255))
+    cv2.circle(img1, (int(u), int(v)), 10, (0,255,255))
     #cv2.circle(img1, (int(x + w * np.cos(t / 180 * np.pi)), int(y + w * np.sin(t/ 180 * np.pi))), 10, (0,255,0))
 
     #palm_detections = denormalize_detections(normalized_palm_detections, scale, pad)
