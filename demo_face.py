@@ -71,7 +71,7 @@ while hasFrame:
     flags, normalized_landmarks = face_regressor(img.to(gpu))
     landmarks = face_regressor.denormalize_landmarks(normalized_landmarks.cpu(), affine)
 
-    frame = cv2.rectangle(frame, (0,0), (400,400), (120, 120, 120), 400)
+    #frame = cv2.rectangle(frame, (0,0), (400,400), (120, 120, 120), 400)
 
     for i in range(len(flags)):
         landmark, flag = landmarks[i], flags[i]
