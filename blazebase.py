@@ -245,7 +245,7 @@ class BlazeDetector(BlazeBase):
         if isinstance(img, np.ndarray):
             img = torch.from_numpy(img).permute((2, 0, 1))
 
-        return self.predict_on_batch(img.unsqueeze(0))[0]
+        return self.predict_on_batch(img.unsqueeze(0))#[0]
 
     def predict_on_batch(self, x):
         """Makes a prediction on a batch of images.
@@ -283,14 +283,17 @@ class BlazeDetector(BlazeBase):
         detections = self._tensors_to_detections(out[0], out[1], self.anchors)
 
         # 4. Non-maximum suppression to remove overlapping detections:
-        filtered_detections = []
-        for i in range(len(detections)):
-            faces = self._weighted_non_max_suppression(detections[i])
-            faces = torch.stack(faces) if len(faces) > 0 else torch.zeros((0, self.num_coords+1))
-            filtered_detections.append(faces)
+        #filtered_detections = []
+        #for i in range(len(detections)):
+        #    faces = self._weighted_non_max_suppression(detections[i])
+        #    faces = torch.stack(faces) if len(faces) > 0 else torch.zeros((0, self.num_coords+1))
+        #    filtered_detections.append(faces)
 
-        return filtered_detections
+        #return filtered_detections
 
+        faces = self._weighted_non_max_suppression(detections)
+        flitered_detection = torch.stack(faces) if len(faces) > 0 else torch.zeros((0, self.num_coords+1))
+        return flitered_detection
 
     def detection2roi(self, detection):
         """ Convert detections from detector to an oriented bounding box.
@@ -372,13 +375,19 @@ class BlazeDetector(BlazeBase):
 
         # Because each image from the batch can have a different number of
         # detections, process them one at a time using a loop.
-        output_detections = []
-        for i in range(raw_box_tensor.shape[0]):
-            boxes = detection_boxes[i, mask[i]]
-            scores = detection_scores[i, mask[i]].unsqueeze(dim=-1)
-            output_detections.append(torch.cat((boxes, scores), dim=-1))
 
-        return output_detections
+        #output_detections = []
+        #for i in range(raw_box_tensor.shape[0]):
+        #    boxes = detection_boxes[i, mask[i]]
+        #    scores = detection_scores[i, mask[i]].unsqueeze(dim=-1)
+        #    output_detections.append(torch.cat((boxes, scores), dim=-1))
+
+        #return output_detections
+
+        boxes = detection_boxes[0, mask[0]]
+        scores = detection_scores[0, mask[0]].unsqueeze(dim=-1)
+        output_detection = torch.cat((boxes, scores), dim=-1)
+        return output_detection
 
     def _decode_boxes(self, raw_boxes, anchors):
         """Converts the predictions into actual coordinates using

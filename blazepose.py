@@ -104,6 +104,12 @@ class BlazePose(BlazeDetector):
         self.regressor_16 = nn.Conv2d(256, 72, 1, bias=True)
 
     def forward(self, x):
+
+        ##########################################
+        x = x[:,:,:,[2, 1, 0]] # BRG to RGB
+        x = x.permute(0,3,1,2).float() / 255.
+        ##########################################
+
         # TFLite uses slightly different padding on the first conv layer
         # than PyTorch, so do it manually.
         # x = F.pad(x, (1, 2, 1, 2), "constant", 0)
@@ -127,7 +133,7 @@ class BlazePose(BlazeDetector):
         c2 = c2.permute(0, 2, 3, 1)  
         c2 = c2.reshape(b, -1, 1)    
 
-        c = torch.cat((c1, c2), dim=1) 
+        raw_score_tensor = torch.cat((c1, c2), dim=1) 
 
         r1 = self.regressor_8(x)       
         r1 = r1.permute(0, 2, 3, 1)    
@@ -137,5 +143,32 @@ class BlazePose(BlazeDetector):
         r2 = r2.permute(0, 2, 3, 1)    
         r2 = r2.reshape(b, -1, 12)     
 
-        r = torch.cat((r1, r2), dim=1)  
-        return [r, c]
+        raw_box_tensor = torch.cat((r1, r2), dim=1)  
+
+        #return [r, c]
+
+        # 3. Postprocess the raw predictions:
+        #detections = self._tensors_to_detections(r, c, self.anchors) #raw_box_tensor, raw_score_tensor
+        detection_boxes = self._decode_boxes(raw_box_tensor, self.anchors)
+       
+        index = torch.argmax(raw_score_tensor, 1)
+
+        return detection_boxes[0][index][0]
+
+        thresh = self.score_clipping_thresh
+        raw_score_tensor = raw_score_tensor.clamp(-thresh, thresh)
+        detection_scores = raw_score_tensor.sigmoid().squeeze(dim=-1)
+
+        # 4. Non-maximum suppression to remove overlapping detections:
+
+        #filtered_detections = []
+        #for i in range(len(detections)):
+        #    faces = self._weighted_non_max_suppression(detections[i])
+        #    faces = torch.stack(faces) if len(faces) > 0 else torch.zeros((0, self.num_coords+1))
+        #    filtered_detections.append(faces)
+
+        #return filtered_detections
+
+        faces = self._weighted_non_max_suppression(detections)
+        flitered_detection = torch.stack(faces) if len(faces) > 0 else torch.zeros((0, self.num_coords+1))
+        return flitered_detection

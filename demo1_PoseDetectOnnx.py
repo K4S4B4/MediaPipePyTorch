@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import cv2
+import onnxruntime
 
 from blazebase import resize_pad, denormalize_detections
 from blazepose import BlazePose
@@ -20,6 +21,12 @@ pose_detector.load_anchors("anchors_pose.npy")
 pose_regressor = BlazePoseLandmark().to(gpu)
 pose_regressor.load_weights("blazepose_landmark.pth")
 
+onnx_file_name = 'BlazePoseDetection_1x128x128xBGRxByte.onnx'
+sess_options = onnxruntime.SessionOptions()
+sess_options.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
+sess_options.enable_profiling = True
+ort_session = onnxruntime.InferenceSession(onnx_file_name, sess_options)
+input_name = ort_session.get_inputs()[0].name
 
 WINDOW='test'
 cv2.namedWindow(WINDOW)
@@ -38,9 +45,15 @@ while hasFrame:
 
     img1, img2, scale, pad = resize_pad(frame)
 
-    #normalized_pose_detections = pose_detector.predict_on_image(img2)
-    img = torch.from_numpy(img2).unsqueeze(0).to(gpu)
-    normalized_pose_detections = pose_detector(img)
+    ##normalized_pose_detections = pose_detector.predict_on_image(img2)
+    #img = torch.from_numpy(img2).unsqueeze(0).to(gpu)
+    #normalized_pose_detections = pose_detector(img)
+
+    img_in = np.expand_dims(img2, axis=0).astype(np.uint8)
+    ort_inputs = {input_name: img_in}
+    ort_outs = ort_session.run(None, ort_inputs)
+    normalized_pose_detections = torch.from_numpy(ort_outs[0]).to(gpu)
+
     pose_detections = denormalize_detections(normalized_pose_detections, scale, pad)
 
     xc, yc, scale, theta = pose_detector.detection2roi(pose_detections)
