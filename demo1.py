@@ -40,7 +40,7 @@ while hasFrame:
 
     #normalized_pose_detections = pose_detector.predict_on_image(img2)
     img = torch.from_numpy(img2).unsqueeze(0).to(gpu)
-    normalized_pose_detections = pose_detector(img)
+    normalized_pose_detections, confidence = pose_detector(img)
     pose_detections = denormalize_detections(normalized_pose_detections, scale, pad)
 
     xc, yc, scale, theta = pose_detector.detection2roi(pose_detections)

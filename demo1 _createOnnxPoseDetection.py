@@ -23,12 +23,13 @@ x = torch.randn((batch_size, height, width, 3), requires_grad=True).byte().to(gp
 ##############################################################################
 
 input_names = ["input"] #[B,192,192,3],
-output_names = ['detection'] #[B,486,3], [B]
+output_names = ['detection', 'confidence'] #[B,486,3], [B]
 
 onnx_file_name = "BlazePoseDetection_1x128x128xBGRxByte.onnx".format(batch_size, height, width)
 dynamic_axes = {
     "input": {0: "batch_size"}, 
-    "detection": {0: "batch_size"}
+    "detection": {0: "batch_size"}, 
+    "confidence": {0: "batch_size"}
     }
 
 torch.onnx.export(model,

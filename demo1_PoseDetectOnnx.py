@@ -54,20 +54,31 @@ while hasFrame:
     ort_outs = ort_session.run(None, ort_inputs)
     normalized_pose_detections = torch.from_numpy(ort_outs[0]).to(gpu)
 
-    pose_detections = denormalize_detections(normalized_pose_detections, scale, pad)
+    print(ort_outs[1])
 
-    xc, yc, scale, theta = pose_detector.detection2roi(pose_detections)
-    img, affine, box = pose_regressor.extract_roi(frame, xc, yc, theta, scale)
-    flags, normalized_landmarks, mask = pose_regressor(img.to(gpu))
-    landmarks = pose_regressor.denormalize_landmarks(normalized_landmarks, affine)
+    if ort_outs[1] > 0.5:
+        pose_detections = denormalize_detections(normalized_pose_detections, scale, pad)
 
-    draw_detections(frame, pose_detections)
-    draw_roi(frame, box)
+        cv2.circle(frame, (int(pose_detections[0, 0]), int(pose_detections[0, 1])), 2, (0, 0, 255), thickness=2)
+        cv2.circle(frame, (int(pose_detections[0, 2]), int(pose_detections[0, 3])), 2, (0, 0, 255), thickness=2)
+        cv2.circle(frame, (int(pose_detections[0, 4]), int(pose_detections[0, 5])), 2, (0, 0, 255), thickness=2)
+        cv2.circle(frame, (int(pose_detections[0, 6]), int(pose_detections[0, 7])), 2, (0, 0, 255), thickness=2)
+        cv2.circle(frame, (int(pose_detections[0, 8]), int(pose_detections[0, 9])), 2, (0, 0, 255), thickness=2)
+        cv2.circle(frame, (int(pose_detections[0, 10]),int(pose_detections[0, 11])), 2, (0, 0, 255), thickness=2)
 
-    for i in range(len(flags)):
-        landmark, flag = landmarks[i], flags[i]
-        if flag>.5:
-            draw_landmarks(frame, landmark, POSE_CONNECTIONS, size=2)
+
+        #xc, yc, scale, theta = pose_detector.detection2roi(pose_detections)
+        #img, affine, box = pose_regressor.extract_roi(frame, xc, yc, theta, scale)
+        #flags, normalized_landmarks, mask = pose_regressor(img.to(gpu))
+        #landmarks = pose_regressor.denormalize_landmarks(normalized_landmarks, affine)
+
+        #draw_detections(frame, pose_detections)
+        #draw_roi(frame, box)
+
+        #for i in range(len(flags)):
+        #    landmark, flag = landmarks[i], flags[i]
+        #    if flag>.5:
+        #        draw_landmarks(frame, landmark, POSE_CONNECTIONS, size=2)
 
     cv2.imshow(WINDOW, frame[:,:,::-1])
     # cv2.imwrite('sample/%04d.jpg'%frame_ct, frame[:,:,::-1])
