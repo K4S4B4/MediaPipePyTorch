@@ -147,23 +147,46 @@ class BlazePose(BlazeDetector):
 
         #return [r, c]
 
-        index = torch.argmax(raw_score_tensor, 1).squeeze()
+        #index = torch.argmax(raw_score_tensor, 1).squeeze()
+        max = torch.max(raw_score_tensor, 1)
+        index = max[1]
 
-        raw_box_tensor = raw_box_tensor[torch.arange(b), index]
-        raw_score_tensor = raw_score_tensor[torch.arange(b), index]
+        #raw_box_tensor = raw_box_tensor[torch.arange(b), index]
+        #raw_score_tensor = raw_score_tensor[torch.arange(b), index]
 
-        for k in [2, 3]:
-            offset = 4 + k*2
-            keypoint_x = raw_box_tensor[..., offset    ] / self.x_scale * torch.index_select(self.anchors, 0, index)[:, 2] + torch.index_select(self.anchors, 0, index)[:, 0]
-            keypoint_y = raw_box_tensor[..., offset + 1] / self.y_scale * torch.index_select(self.anchors, 0, index)[:, 3] + torch.index_select(self.anchors, 0, index)[:, 1]
-            raw_box_tensor[..., offset    ] = keypoint_x
-            raw_box_tensor[..., offset + 1] = keypoint_y
+        # batch=1を前提にする
+        raw_box_tensor = raw_box_tensor[0][index]
+        raw_score_tensor = raw_score_tensor[0][index]
 
-        #raw_box_tensor = raw_box_tensor[:, 8:12]
+        raw_box_tensor[:,:,4] = raw_box_tensor[:,:,4] / self.x_scale * self.anchors[index, 2] + self.anchors[index, 0]
+        raw_box_tensor[:,:,5] = raw_box_tensor[:,:,5] / self.y_scale * self.anchors[index, 3] + self.anchors[index, 1]
+
+        #raw_box_tensor[:,:,6] = raw_box_tensor[:,:,6] / self.x_scale * self.anchors[index, 2] + self.anchors[index, 0]
+        #raw_box_tensor[:,:,7] = raw_box_tensor[:,:,7] / self.y_scale * self.anchors[index, 3] + self.anchors[index, 1]
+
+        #raw_box_tensor[:,:,8] = raw_box_tensor[:,:,8] / self.x_scale * self.anchors[index, 2] + self.anchors[index, 0]
+        #raw_box_tensor[:,:,9] = raw_box_tensor[:,:,9] / self.y_scale * self.anchors[index, 3] + self.anchors[index, 1]
+
+        raw_box_tensor[:,:,10] = raw_box_tensor[:,:,10] / self.x_scale * self.anchors[index, 2] + self.anchors[index, 0]
+        raw_box_tensor[:,:,11] = raw_box_tensor[:,:,11] / self.y_scale * self.anchors[index, 3] + self.anchors[index, 1]
+
         return raw_box_tensor, raw_score_tensor
 
 
-        #detection_boxes = self._decode_boxes(raw_box_tensor, self.anchors)
+
+
+        #for k in [2, 3]:
+        #    offset = 4 + k*2
+        #    keypoint_x = raw_box_tensor[..., offset    ] / self.x_scale * self.anchors[:, 2] + self.anchors[:, 0]
+        #    keypoint_y = raw_box_tensor[..., offset + 1] / self.y_scale * self.anchors[:, 3] + self.anchors[:, 1]
+        #    raw_box_tensor[..., offset    ] = keypoint_x
+        #    raw_box_tensor[..., offset + 1] = keypoint_y
+
+        #raw_box_tensor = raw_box_tensor[:,:,8:12]
+
+        #return raw_box_tensor, raw_score_tensor
+
+
        
         #index = torch.argmax(raw_score_tensor, 1).squeeze()
 

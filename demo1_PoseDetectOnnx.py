@@ -52,18 +52,18 @@ while hasFrame:
     img_in = np.expand_dims(img2, axis=0).astype(np.uint8)
     ort_inputs = {input_name: img_in}
     ort_outs = ort_session.run(None, ort_inputs)
-    normalized_pose_detections = torch.from_numpy(ort_outs[0]).to(gpu)
+    normalized_pose_detections = torch.from_numpy(ort_outs[0][0]).to(gpu)
 
     print(ort_outs[1])
 
-    if ort_outs[1] > 0.5:
+    if ort_outs[1][0,0,0] > 0.5:
         pose_detections = denormalize_detections(normalized_pose_detections, scale, pad)
 
-        cv2.circle(frame, (int(pose_detections[0, 0]), int(pose_detections[0, 1])), 2, (0, 0, 255), thickness=2)
-        cv2.circle(frame, (int(pose_detections[0, 2]), int(pose_detections[0, 3])), 2, (0, 0, 255), thickness=2)
-        cv2.circle(frame, (int(pose_detections[0, 4]), int(pose_detections[0, 5])), 2, (0, 0, 255), thickness=2)
-        cv2.circle(frame, (int(pose_detections[0, 6]), int(pose_detections[0, 7])), 2, (0, 0, 255), thickness=2)
-        cv2.circle(frame, (int(pose_detections[0, 8]), int(pose_detections[0, 9])), 2, (0, 0, 255), thickness=2)
+        #cv2.circle(frame, (int(pose_detections[0, 0]), int(pose_detections[0, 1])), 2, (255, 255, 0), thickness=2)
+        #cv2.circle(frame, (int(pose_detections[0, 2]), int(pose_detections[0, 3])), 2, (0, 0, 0), thickness=2)
+        cv2.circle(frame, (int(pose_detections[0, 4]), int(pose_detections[0, 5])), 2, (255, 255, 255), thickness=2)
+        #cv2.circle(frame, (int(pose_detections[0, 6]), int(pose_detections[0, 7])), 2, (255, 0, 0), thickness=2)
+        #cv2.circle(frame, (int(pose_detections[0, 8]), int(pose_detections[0, 9])), 2, (0, 255, 0), thickness=2)
         cv2.circle(frame, (int(pose_detections[0, 10]),int(pose_detections[0, 11])), 2, (0, 0, 255), thickness=2)
 
 
