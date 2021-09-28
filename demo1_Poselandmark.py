@@ -29,8 +29,8 @@ ort_session = onnxruntime.InferenceSession(onnx_file_name, sess_options)
 input_name = ort_session.get_inputs()[0].name
 
 #onnx_file_name2 = 'resource\MediaPipe\pose_landmark_lite_1x256x256x3xBGRxByte.onnx'
-#onnx_file_name2 = 'resource\MediaPipe\pose_landmark_full_1x256x256x3xBGRxByte.onnx'
-onnx_file_name2 = 'resource\MediaPipe\pose_landmark_heavy_1x256x256x3xBGRxByte.onnx'
+onnx_file_name2 = 'resource\MediaPipe\pose_landmark_full_1x256x256x3xBGRxByte.onnx'
+#onnx_file_name2 = 'resource\MediaPipe\pose_landmark_heavy_1x256x256x3xBGRxByte.onnx'
 sess_options2 = onnxruntime.SessionOptions()
 sess_options2.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
 sess_options2.enable_profiling = True
@@ -51,7 +51,7 @@ else:
 while hasFrame:
     frame_ct +=1
 
-    frame = np.ascontiguousarray(frame[:,::-1,::-1])
+    #frame = np.ascontiguousarray(frame[:,::-1,::-1])
 
     img1, img2, scale, pad = resize_pad(frame)
 
@@ -76,7 +76,8 @@ while hasFrame:
 
     #print(ort_outs2[1])
 
-    if ort_outs[1][0,0,0] > 0.5:
+
+    if ort_outs2[1] > 0.5:
         pose_detections = denormalize_detections(normalized_pose_detections, scale, pad)
 
         #cv2.circle(frame, (int(pose_detections[0, 0]), int(pose_detections[0, 1])), 2, (255, 255, 0), thickness=2)
@@ -87,12 +88,67 @@ while hasFrame:
         #cv2.circle(frame, (int(pose_detections[0, 10]),int(pose_detections[0, 11])), 2, (0, 0, 255), thickness=2)
 
         for n in range(0, 33):
-            cv2.circle(frame, (int(ort_outs2[0][0, 5*n + 0]* scale)- pad[1],int(ort_outs2[0][0, 5*n + 1]* scale) - pad[0]), 5, (0, 255, 0), thickness=2)
+            cv2.circle(frame, (int(ort_outs2[0][0, 5*n + 0]* scale)- pad[1],int(ort_outs2[0][0, 5*n + 1]* scale) - pad[0]), 5, (0, 0, 0), thickness=2)
 
-        for n in range(33, 39):
-            cv2.circle(frame, (int(ort_outs2[0][0, 5*n + 0]* scale)- pad[1],int(ort_outs2[0][0, 5*n + 1]* scale)- pad[0]), 5, (255, 255, 255), thickness=2)
+        #for n in range(33, 39):
+            #cv2.circle(frame, (int(ort_outs2[0][0, 5*n + 0]* scale)- pad[1],int(ort_outs2[0][0, 5*n + 1]* scale)- pad[0]), 5, (255, 255, 255), thickness=2)
+
             #cv2.circle(frame, (int(ort_outs2[4][0, 3*n + 0]) * 256 + 128,int(ort_outs2[4][0, 3*n + 1]))* 256 + 128, 2, (255, 0, 0), thickness=2)
             #print(ort_outs2[0][0, 5*n + 0] - ort_outs2[4][0, 3*n + 0]* 256 - 128)
+
+        n = 33
+        cv2.circle(frame, (int(ort_outs2[0][0, 5*n + 0]* scale)- pad[1],int(ort_outs2[0][0, 5*n + 1]* scale)- pad[0]), 5, (255, 255, 255), thickness=2)
+        n = 34
+        cv2.circle(frame, (int(ort_outs2[0][0, 5*n + 0]* scale)- pad[1],int(ort_outs2[0][0, 5*n + 1]* scale)- pad[0]), 5, (255, 0, 0), thickness=2)
+        n = 35
+        cv2.circle(frame, (int(ort_outs2[0][0, 5*n + 0]* scale)- pad[1],int(ort_outs2[0][0, 5*n + 1]* scale)- pad[0]), 5, (0, 255, 0), thickness=2)
+        n = 36
+        cv2.circle(frame, (int(ort_outs2[0][0, 5*n + 0]* scale)- pad[1],int(ort_outs2[0][0, 5*n + 1]* scale)- pad[0]), 5, (0, 0, 255), thickness=2)
+        n = 37
+        cv2.circle(frame, (int(ort_outs2[0][0, 5*n + 0]* scale)- pad[1],int(ort_outs2[0][0, 5*n + 1]* scale)- pad[0]), 5, (255, 127, 127), thickness=2)
+        n = 38
+        cv2.circle(frame, (int(ort_outs2[0][0, 5*n + 0]* scale)- pad[1],int(ort_outs2[0][0, 5*n + 1]* scale)- pad[0]), 5, (127, 255, 127), thickness=2)
+
+        #print(  ort_outs2[0][0, 5*0 + 3]
+        #        , ort_outs2[0][0, 5*1 + 3]
+        #        , ort_outs2[0][0, 5*2 + 3]
+        #        , ort_outs2[0][0, 5*3 + 3]
+        #        , ort_outs2[0][0, 5*4 + 3]
+        #        , ort_outs2[0][0, 5*5 + 3]
+        #        , ort_outs2[0][0, 5*6 + 3]
+        #        , ort_outs2[0][0, 5*7 + 3]
+        #        , ort_outs2[0][0, 5*8 + 3]
+        #        , ort_outs2[0][0, 5*9 + 3]
+        #        , ort_outs2[0][0, 5*10 + 3]
+        #        , ort_outs2[0][0, 5*11 + 3]
+        #        , ort_outs2[0][0, 5*12 + 3]
+        #        , ort_outs2[0][0, 5*13 + 3]
+        #        , ort_outs2[0][0, 5*14 + 3]
+        #        , ort_outs2[0][0, 5*15 + 3]
+        #        , ort_outs2[0][0, 5*16 + 3]
+        #        , ort_outs2[0][0, 5*17 + 3]
+        #        , ort_outs2[0][0, 5*18 + 3]
+        #        , ort_outs2[0][0, 5*19 + 3]
+        #        , ort_outs2[0][0, 5*20 + 3]
+        #        , ort_outs2[0][0, 5*21 + 3]
+        #        , ort_outs2[0][0, 5*22 + 3]
+        #        , ort_outs2[0][0, 5*23 + 3]
+        #        , ort_outs2[0][0, 5*24 + 3]
+        #        , ort_outs2[0][0, 5*25 + 3]
+        #        , ort_outs2[0][0, 5*26 + 3]
+        #        , ort_outs2[0][0, 5*27 + 3]
+        #        , ort_outs2[0][0, 5*28 + 3]
+        #        , ort_outs2[0][0, 5*29 + 3]
+        #        , ort_outs2[0][0, 5*30 + 3]
+        #        , ort_outs2[0][0, 5*31 + 3]
+        #        , ort_outs2[0][0, 5*32 + 3]
+        #        , ort_outs2[0][0, 5*33 + 3]
+        #        , ort_outs2[0][0, 5*34 + 3]
+        #        , ort_outs2[0][0, 5*35 + 3]
+        #        , ort_outs2[0][0, 5*36 + 3]
+        #        , ort_outs2[0][0, 5*37 + 3]
+        #        , ort_outs2[0][0, 5*38 + 3]
+        #        )
 
         #xc, yc, scale, theta = pose_detector.detection2roi(pose_detections)
         #img, affine, box = pose_regressor.extract_roi(frame, xc, yc, theta, scale)
@@ -108,7 +164,7 @@ while hasFrame:
         #        draw_landmarks(frame, landmark, POSE_CONNECTIONS, size=2)
 
     frame = cv2.resize(frame, dsize=None, fx = 2, fy =2)
-    cv2.imshow(WINDOW, frame[:,:,::-1])
+    cv2.imshow(WINDOW, frame)
     # cv2.imwrite('sample/%04d.jpg'%frame_ct, frame[:,:,::-1])
 
     hasFrame, frame = capture.read()

@@ -5,7 +5,7 @@ import torch.nn as nn
 
 class DummyModel(nn.Module):
     def forward(self, x):
-        #x = x[:,:,:,[2, 1, 0]] # BRG to RGB
+        x = x[:,:,:,[2, 1, 0]] # BRG to RGB
         #x = x.permute(0,3,1,2).float() / 255.
         x = x.float() * 0.00392156862
 
@@ -26,7 +26,7 @@ x = torch.randn((batch_size, height, width, 3), requires_grad=True).byte().to(gp
 input_names = ['input_byte']
 output_names = ['output_dummy']
 
-onnx_file_name = "Dummy_{}x{}x{}xBGRxByte.onnx".format(batch_size, height, width)
+onnx_file_name = "resource/Dummy_{}x{}x{}xBGRxByte.onnx".format(batch_size, height, width)
 dynamic_axes = {
     "input_byte": {0: "batch_size"}, 
     "output_dummy": {0: "batch_size"}

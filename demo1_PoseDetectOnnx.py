@@ -21,7 +21,7 @@ pose_detector.load_anchors("anchors_pose.npy")
 pose_regressor = BlazePoseLandmark().to(gpu)
 pose_regressor.load_weights("blazepose_landmark.pth")
 
-onnx_file_name = 'BlazePoseDetection_1x128x128xBGRxByte.onnx'
+onnx_file_name = 'resource/MediaPipe/BlazePoseDetection_1x128x128xBGRxByte.onnx'
 sess_options = onnxruntime.SessionOptions()
 sess_options.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
 sess_options.enable_profiling = True
