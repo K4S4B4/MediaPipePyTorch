@@ -65,10 +65,10 @@ while hasFrame:
         normalized_face_detections = face_detector.predict_on_image(img1)
     else:
         normalized_face_detections = face_detector.predict_on_image(img2)
-    normalized_palm_detections = palm_detector.predict_on_image(img1)
+    #normalized_palm_detections = palm_detector.predict_on_image(img1)
 
     face_detections = denormalize_detections(normalized_face_detections, scale, pad)
-    palm_detections = denormalize_detections(normalized_palm_detections, scale, pad)
+    #palm_detections = denormalize_detections(normalized_palm_detections, scale, pad)
 
 
     xc, yc, scale, theta = face_detector.detection2roi(face_detections.cpu())
@@ -77,14 +77,14 @@ while hasFrame:
     landmarks = face_regressor.denormalize_landmarks(normalized_landmarks.cpu(), affine)
 
 
-    xc, yc, scale, theta = palm_detector.detection2roi(palm_detections.cpu())
-    img, affine2, box2 = hand_regressor.extract_roi(frame, xc, yc, theta, scale)
-    #if img.shape[0]>0:
-    #    debugImg = img[0].clone().permute(1,2,0).to('cpu').detach().numpy().copy()
-    #    cv2.imshow('input', debugImg)
-    #    cv2.waitKey(1)
-    flags2, handed2, normalized_landmarks2 = hand_regressor(img.to(gpu))
-    landmarks2 = hand_regressor.denormalize_landmarks(normalized_landmarks2.cpu(), affine2)
+    #xc, yc, scale, theta = palm_detector.detection2roi(palm_detections.cpu())
+    #img, affine2, box2 = hand_regressor.extract_roi(frame, xc, yc, theta, scale)
+    ##if img.shape[0]>0:
+    ##    debugImg = img[0].clone().permute(1,2,0).to('cpu').detach().numpy().copy()
+    ##    cv2.imshow('input', debugImg)
+    ##    cv2.waitKey(1)
+    #flags2, handed2, normalized_landmarks2 = hand_regressor(img.to(gpu))
+    #landmarks2 = hand_regressor.denormalize_landmarks(normalized_landmarks2.cpu(), affine2)
     
 
     for i in range(len(flags)):
@@ -93,15 +93,15 @@ while hasFrame:
             draw_landmarks(frame, landmark[:,:2], FACE_CONNECTIONS, size=1)
 
 
-    for i in range(len(flags2)):
-        landmark, flag = landmarks2[i], flags2[i]
-        if flag>.5:
-            draw_landmarks(frame, landmark[:,:2], HAND_CONNECTIONS, size=2)
+    #for i in range(len(flags2)):
+    #    landmark, flag = landmarks2[i], flags2[i]
+    #    if flag>.5:
+    #        draw_landmarks(frame, landmark[:,:2], HAND_CONNECTIONS, size=2)
 
     draw_roi(frame, box)
-    draw_roi(frame, box2)
+    #draw_roi(frame, box2)
     draw_detections(frame, face_detections)
-    draw_detections(frame, palm_detections)
+    #draw_detections(frame, palm_detections)
 
     cv2.imshow(WINDOW, frame[:,:,::-1])
     # cv2.imwrite('sample/%04d.jpg'%frame_ct, frame[:,:,::-1])
