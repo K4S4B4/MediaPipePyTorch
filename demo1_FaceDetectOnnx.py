@@ -9,7 +9,7 @@ from visualization import draw_detections, draw_landmarks, draw_roi, POSE_CONNEC
 gpu = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 torch.set_grad_enabled(False)
 
-onnx_file_name = 'BlazeFaceDetection_1x256x256xBGRxByte.onnx'
+onnx_file_name = 'BlazeFaceDetection_1x256x256xBGRxByte_opset12.onnx'
 #onnx_file_name = 'BlazeFaceDetection_1x256x256xBGRxByte.onnx'
 #onnx_file_name = 'resource/MediaPipe/BlazeFaceDetection_1x256x256xBGRxByte.onnx'
 sess_options = onnxruntime.SessionOptions()
