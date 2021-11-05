@@ -41,6 +41,8 @@ class BlazeFace(BlazeDetector):
         if back_model:
             self.x_scale = 256.0
             self.y_scale = 256.0
+            self.x_scaleInv = 1.0 / 256.0
+            self.y_scaleInv = 1.0 / 256.0
             self.h_scale = 256.0
             self.w_scale = 256.0
             self.min_score_thresh = 0.65
@@ -145,7 +147,7 @@ class BlazeFace(BlazeDetector):
     def forward(self, x):
         ##########################################
         x = x[:,:,:,[2, 1, 0]] # BRG to RGB
-        x = x.permute(0,3,1,2).float() / 255.
+        x = x.permute(0,3,1,2).float() * 0.00392156862
         ##########################################
 
         # TFLite uses slightly different padding on the first conv layer
@@ -212,8 +214,8 @@ class BlazeFace(BlazeDetector):
 
         for k in range(self.num_keypoints):
             offset = 4 + k*2
-            raw_box_tensor[:,:,offset    ] = raw_box_tensor[:,:,offset    ] / self.x_scale * self.anchors[index, 2] + self.anchors[index, 0]
-            raw_box_tensor[:,:,offset + 1] = raw_box_tensor[:,:,offset + 1] / self.y_scale * self.anchors[index, 3] + self.anchors[index, 1]
+            raw_box_tensor[:,:,offset    ] = raw_box_tensor[:,:,offset    ] * self.x_scaleInv * self.anchors[index, 2] + self.anchors[index, 0]
+            raw_box_tensor[:,:,offset + 1] = raw_box_tensor[:,:,offset + 1] * self.y_scaleInv * self.anchors[index, 3] + self.anchors[index, 1]
 
 
         return raw_box_tensor, raw_score_tensor

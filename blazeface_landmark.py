@@ -63,17 +63,17 @@ class BlazeFaceLandmark(BlazeLandmark):
 
     def forward(self, x):
         ##########################################
-        #x = x[:,:,:,[2, 1, 0]] # BRG to RGB
-        #x = x.permute(0,3,1,2).float() / 255.
+        x = x[:,:,:,[2, 1, 0]] # BRG to RGB
+        x = x.permute(0,3,1,2).float() * 0.00392156862
         ##########################################
 
-        if x.shape[0] == 0:
-            return torch.zeros((0,)), torch.zeros((0, 468, 3))
+        #if x.shape[0] == 0:
+        #    return torch.zeros((0,)), torch.zeros((0, 468, 3))
             
         x = F.pad(x, (0, 1, 0, 1), "constant", 0)
 
         x = self.backbone1(x)
-        landmarks = self.backbone2a(x).view(-1, 468, 3) / 192
+        landmarks = self.backbone2a(x).view(-1, 468, 3) * 0.00520833333
         #landmarks = self.backbone2a(x).view(-1, 468, 3)
         flag = self.backbone2b(x).sigmoid().view(-1)
 
