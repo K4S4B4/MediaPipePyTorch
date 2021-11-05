@@ -4,16 +4,12 @@ import torch
 class PreprocessModel(torch.nn.Module):
     def forward(self, x):
         # BRG to RGB
-        x = x[:,:,:,[2, 1, 0]]
+        #x = x[:,:,:,[2, 1, 0]]
+        x = x.flip(3)
         # NHWC to NCHW, Byte to float, [0, 255] to [0, 1]
         x = x.permute(0,3,1,2).float() / 255.
-
-        x = x.reshape(4, 4, -1)
-        sum = x.sum(dim=2);
-        max = x.max();
-
         # Output [1,256,256,3] RGB float
-        return max, sum
+        return x
 
 # Input shape definition
 batch_size = 1
@@ -23,10 +19,10 @@ channel = 3
 
 # I/O names definition
 input_names = ["inputByteArray"]
-output_names = ['outputFloat1', 'outputFloat4x4']
+output_names = ['outputFloatArray']
 
 # ONNX file name definition
-onnx_file_name = "Dummy_{}_{}_{}_{}xByte_opX11.onnx".format(batch_size, height, width, channel)
+onnx_file_name = "Preprocess{}x{}x{}xBGRxByte.onnx".format(batch_size, height, width)
 
 # Export ONNX model
 cpu = torch.device("cpu")
@@ -36,7 +32,7 @@ torch.onnx.export(model,
                 x,
                 onnx_file_name,
                 export_params=True,
-                opset_version=11,
+                opset_version=12,
                 do_constant_folding=True,
                 input_names=input_names, 
                 output_names=output_names

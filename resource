@@ -1,1 +1,1 @@
-C:/Users/user/OneDrive - 合同会社田口商事/resource
+C:/Users/AkiyaSouken/OneDrive - 合同会社田口商事/resource
