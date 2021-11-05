@@ -4,11 +4,11 @@ import torch
 class PreprocessModel(torch.nn.Module):
     def forward(self, x):
         # BRG to RGB
-        #x = x[:,:,:,[2, 1, 0]]
-        x = x.flip(3)
+        x = x[:,:,:,[2, 1, 0]]
+        #x = x.flip(3)
         # NHWC to NCHW, Byte to float, [0, 255] to [0, 1]
         x = x.permute(0,3,1,2).float() / 255.
-        # Output [1,256,256,3] RGB float
+        # Output [1,3,256,256] RGB float
         return x
 
 # Input shape definition

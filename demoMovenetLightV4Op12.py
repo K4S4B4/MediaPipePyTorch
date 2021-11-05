@@ -35,8 +35,9 @@ if capture.isOpened():
 else:
     hasFrame = False
 
-#onnx_file_name = 'resource/MediaPipe/BlazeHand_B_256_256_BGRxByte.onnx'
-onnx_file_name = 'resource/MoveNet/movenet_singlepose_lightning_4_1x192x192x3xBGRxByte.onnx'
+onnx_file_name = 'resource/MoveNet/movenet_singlepose_thunder_4_1x256x256x3xBGRxByte_opset12.onnx'
+#onnx_file_name = 'resource/MoveNet/movenet_singlepose_lightning_4_1x192x192x3xBGRxByte_opset12.onnx'
+input_size = 256
 sess_options = onnxruntime.SessionOptions()
 sess_options.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
 sess_options.enable_profiling = True
@@ -47,7 +48,7 @@ input_name = ort_session.get_inputs()[0].name
 while hasFrame:
     img1, img2, scale, pad = resize_pad(frame)
 
-    img1 = cv2.resize(img1, (192,192))
+    img1 = cv2.resize(img1, (input_size,input_size))
 
     img_in = np.expand_dims(img1, axis=0).astype(np.uint8)
     ort_inputs = {input_name: img_in}
@@ -61,7 +62,7 @@ while hasFrame:
 
     for i in range(17):
         x, y = landmark[i][1], landmark[i][0]
-        x, y = int(x * 192), int(y * 192)
+        x, y = int(x * input_size), int(y * input_size)
         cv2.circle(img1, (x, y), 2, (0, 255, 0), thickness=2)
 
 
