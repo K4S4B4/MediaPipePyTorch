@@ -104,6 +104,12 @@ class BlazePose(BlazeDetector):
         self.regressor_16 = nn.Conv2d(256, 72, 1, bias=True)
 
     def forward(self, x):
+
+        ##########################################
+        x = x[:,:,:,[2, 1, 0]] # BRG to RGB
+        x = x.permute(0,3,1,2).float() / 255.
+        ##########################################
+
         # TFLite uses slightly different padding on the first conv layer
         # than PyTorch, so do it manually.
         # x = F.pad(x, (1, 2, 1, 2), "constant", 0)
@@ -127,7 +133,7 @@ class BlazePose(BlazeDetector):
         c2 = c2.permute(0, 2, 3, 1)  
         c2 = c2.reshape(b, -1, 1)    
 
-        c = torch.cat((c1, c2), dim=1) 
+        raw_score_tensor = torch.cat((c1, c2), dim=1) 
 
         r1 = self.regressor_8(x)       
         r1 = r1.permute(0, 2, 3, 1)    
@@ -137,5 +143,55 @@ class BlazePose(BlazeDetector):
         r2 = r2.permute(0, 2, 3, 1)    
         r2 = r2.reshape(b, -1, 12)     
 
-        r = torch.cat((r1, r2), dim=1)  
-        return [r, c]
+        raw_box_tensor = torch.cat((r1, r2), dim=1)  
+
+        #return [r, c]
+
+        #index = torch.argmax(raw_score_tensor, 1).squeeze()
+        max = torch.max(raw_score_tensor, 1)
+        index = max[1]
+
+        #raw_box_tensor = raw_box_tensor[torch.arange(b), index]
+        #raw_score_tensor = raw_score_tensor[torch.arange(b), index]
+
+        # batch=1を前提にする
+        raw_box_tensor = raw_box_tensor[0][index]
+        raw_score_tensor = raw_score_tensor[0][index]
+
+        raw_box_tensor[:,:,4] = raw_box_tensor[:,:,4] / self.x_scale * self.anchors[index, 2] + self.anchors[index, 0]
+        raw_box_tensor[:,:,5] = raw_box_tensor[:,:,5] / self.y_scale * self.anchors[index, 3] + self.anchors[index, 1]
+
+        #raw_box_tensor[:,:,6] = raw_box_tensor[:,:,6] / self.x_scale * self.anchors[index, 2] + self.anchors[index, 0]
+        #raw_box_tensor[:,:,7] = raw_box_tensor[:,:,7] / self.y_scale * self.anchors[index, 3] + self.anchors[index, 1]
+
+        #raw_box_tensor[:,:,8] = raw_box_tensor[:,:,8] / self.x_scale * self.anchors[index, 2] + self.anchors[index, 0]
+        #raw_box_tensor[:,:,9] = raw_box_tensor[:,:,9] / self.y_scale * self.anchors[index, 3] + self.anchors[index, 1]
+
+        raw_box_tensor[:,:,10] = raw_box_tensor[:,:,10] / self.x_scale * self.anchors[index, 2] + self.anchors[index, 0]
+        raw_box_tensor[:,:,11] = raw_box_tensor[:,:,11] / self.y_scale * self.anchors[index, 3] + self.anchors[index, 1]
+
+        return raw_box_tensor, raw_score_tensor
+
+
+
+
+        #for k in [2, 3]:
+        #    offset = 4 + k*2
+        #    keypoint_x = raw_box_tensor[..., offset    ] / self.x_scale * self.anchors[:, 2] + self.anchors[:, 0]
+        #    keypoint_y = raw_box_tensor[..., offset + 1] / self.y_scale * self.anchors[:, 3] + self.anchors[:, 1]
+        #    raw_box_tensor[..., offset    ] = keypoint_x
+        #    raw_box_tensor[..., offset + 1] = keypoint_y
+
+        #raw_box_tensor = raw_box_tensor[:,:,8:12]
+
+        #return raw_box_tensor, raw_score_tensor
+
+
+       
+        #index = torch.argmax(raw_score_tensor, 1).squeeze()
+
+        #detection_boxes = detection_boxes[torch.arange(b), index]
+        #raw_score_tensor = raw_score_tensor[torch.arange(b), index]
+
+        #return detection_boxes, raw_score_tensor
+

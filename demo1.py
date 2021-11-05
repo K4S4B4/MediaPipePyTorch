@@ -23,7 +23,7 @@ pose_regressor.load_weights("blazepose_landmark.pth")
 
 WINDOW='test'
 cv2.namedWindow(WINDOW)
-capture = cv2.VideoCapture(0)
+capture = cv2.VideoCapture(2)
 
 if capture.isOpened():
     hasFrame, frame = capture.read()
@@ -38,7 +38,9 @@ while hasFrame:
 
     img1, img2, scale, pad = resize_pad(frame)
 
-    normalized_pose_detections = pose_detector.predict_on_image(img2)
+    #normalized_pose_detections = pose_detector.predict_on_image(img2)
+    img = torch.from_numpy(img2).unsqueeze(0).to(gpu)
+    normalized_pose_detections, confidence = pose_detector(img)
     pose_detections = denormalize_detections(normalized_pose_detections, scale, pad)
 
     xc, yc, scale, theta = pose_detector.detection2roi(pose_detections)
