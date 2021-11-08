@@ -28,7 +28,7 @@ if capture.isOpened():
 else:
     hasFrame = False
 
-onnx_file_name = 'BlazeFace_1_192_192_BGRxByte.onnx'
+onnx_file_name = 'BlazeFace_1x192x192xBGRxByte_opset12.onnx'
 #onnx_file_name = 'resource/MediaPipe/BlazeFace_B_192_192_BGRxByte.onnx'
 sess_options = onnxruntime.SessionOptions()
 sess_options.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL

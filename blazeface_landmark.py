@@ -73,9 +73,9 @@ class BlazeFaceLandmark(BlazeLandmark):
         x = F.pad(x, (0, 1, 0, 1), "constant", 0)
 
         x = self.backbone1(x)
-        landmarks = self.backbone2a(x).view(-1, 468, 3) * 0.00520833333
-        #landmarks = self.backbone2a(x).view(-1, 468, 3)
+        #landmarks = self.backbone2a(x).view(-1, 468, 3) * 0.00520833333
+        landmarks = self.backbone2a(x).view(-1, 468, 3)
         flag = self.backbone2b(x).sigmoid().view(-1)
 
-        #return landmarks, flag
-        return flag, landmarks
+        return landmarks, flag
+        #return flag, landmarks

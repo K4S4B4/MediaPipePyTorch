@@ -28,7 +28,7 @@ opset = 12
 input_names = ["input"] #[B,192,192,3],
 output_names = ['landmark', 'confidence'] #[B,486,3], [B]
 
-onnx_file_name = "BlazeFace_{}_{}_{}_BGRxByte_opset{}.onnx".format(batch_size, height, width, opset)
+onnx_file_name = "BlazeFace_{}x{}x{}xBGRxByte_opset{}.onnx".format(batch_size, height, width, opset)
 dynamic_axes = {
     "input": {0: "batch_size"}, 
     "landmark": {0: "batch_size"}, 
