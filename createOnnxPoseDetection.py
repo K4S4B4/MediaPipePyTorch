@@ -5,6 +5,7 @@ import sys
 
 from blazebase import resize_pad, denormalize_detections
 from blazepose import BlazePose
+#from blazepose_nomax import BlazePose
 from blazepose_landmark import BlazePoseLandmark
 from visualization import draw_detections, draw_landmarks, draw_roi, HAND_CONNECTIONS, FACE_CONNECTIONS
 
@@ -19,14 +20,16 @@ model.load_anchors("anchors_pose.npy")
 batch_size = 1
 height = 128
 width = 128
-x = torch.randn((batch_size, height, width, 3), requires_grad=True).byte().to(gpu)
+#x = torch.randn((batch_size, height, width, 3), requires_grad=True).byte().to(gpu)
+x = torch.randn((batch_size, height, width, 3), requires_grad=True).int().to(gpu)
 opset = 12
 ##############################################################################
 
 input_names = ["input"] #[B,192,192,3],
 output_names = ['detection', 'confidence'] #[B,486,3], [B]
 
-onnx_file_name = "BlazePoseDetection_{}x{}x{}xBGRxByte_opset{}.onnx".format(batch_size, height, width, opset)
+#onnx_file_name = "BlazePoseDetection_{}x{}x{}xBGRxByte_opset{}.onnx".format(batch_size, height, width, opset)
+onnx_file_name = "BlazePoseDetection_{}x{}x{}xBGRxInt_opset{}.onnx".format(batch_size, height, width, opset)
 dynamic_axes = {
     "input": {0: "batch_size"}, 
     "detection": {0: "batch_size"}, 

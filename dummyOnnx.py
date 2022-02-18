@@ -5,9 +5,13 @@ import torch.nn as nn
 
 class DummyModel(nn.Module):
     def forward(self, x):
+        #x = x[:,:,:,[2, 1, 0]] # BRG to RGB
+        #x = x.permute(0,3,1,2).float()
+        #x = x.float() * 0.00392156862
+
         x = x[:,:,:,[2, 1, 0]] # BRG to RGB
-        #x = x.permute(0,3,1,2).float() / 255.
-        x = x.float() * 0.00392156862
+        x = x * 255.0
+        x = x.byte()
 
         return x
 
@@ -18,15 +22,20 @@ model = DummyModel().to(gpu)
 
 ##############################################################################
 batch_size = 1
-height = 256
-width = 256
-x = torch.randn((batch_size, height, width, 3), requires_grad=True).byte().to(gpu)
+height = 384
+width = 384
+x = torch.randn((batch_size, height, width, 3), requires_grad=True).float().to(gpu)
+#x = torch.randn((batch_size, height, width, 3), requires_grad=True).byte().to(gpu)
+#x = torch.randn((batch_size, height, width, 3), requires_grad=True).int().to(gpu)
 ##############################################################################
 
+#input_names = ['input_int']
 input_names = ['input_byte']
 output_names = ['output_dummy']
 
-onnx_file_name = "resource/Dummy_{}x{}x{}xBGRxByte.onnx".format(batch_size, height, width)
+onnx_file_name = "resource/Dummy_outputByte_RGB2BGR_1to255_float2byte.onnx".format(batch_size, height, width)
+#onnx_file_name = "resource/Dummy_{}x{}x{}xBGRxByte.onnx".format(batch_size, height, width)
+#onnx_file_name = "resource/Dummy_{}x{}x{}xBGRxInt.onnx".format(batch_size, height, width)
 dynamic_axes = {
     "input_byte": {0: "batch_size"}, 
     "output_dummy": {0: "batch_size"}
